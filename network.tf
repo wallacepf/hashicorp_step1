@@ -9,9 +9,9 @@ module "vpc" {
   name = "vpc-${local.name_suffix}"
   cidr = var.vpc_cidr_block
 
-  azs              = data.aws_availability_zones.available.names
-  private_subnets  = var.private_subnet_cidr_blocks
-  public_subnets   = var.public_subnet_cidr_blocks
+  azs             = data.aws_availability_zones.available.names
+  private_subnets = var.private_subnet_cidr_blocks
+  public_subnets  = var.public_subnet_cidr_blocks
 
   enable_nat_gateway   = true
   single_nat_gateway   = true
@@ -53,7 +53,7 @@ module "security_group_backend" {
       to_port     = 3030
       protocol    = "tcp"
       description = "Access from public subnets"
-      cidr_blocks = module.vpc.vpc_cidr_block
+      cidr_blocks = "0.0.0.0/0"
     },
     {
       from_port   = 22

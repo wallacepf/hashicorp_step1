@@ -33,9 +33,12 @@ tar -xvzf backend.tar.gz -C backend/
 cd backend
 cp .env.sample .env
 sed -i "s/TYPEORM_HOST=mydbaddr/TYPEORM_HOST=${module.db.this_db_instance_address}/g" .env
+source .env
+sudo npm i
+sudo npm run build
 sudo pm2 install typescript
-npm run migrations
-pm2 start src/main.ts
+sudo npm run migrations
+sudo pm2 start src/main.ts
 EOF
 }
 
