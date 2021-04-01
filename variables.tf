@@ -27,10 +27,3 @@ variable "private_subnet_cidr_blocks" {
     "10.0.3.0/24"
   ]
 }
-
-variable "database_subnet_cidr_blocks" {
-  default = [
-    "10.0.4.0/24",
-    "10.0.5.0/24"
-  ]
-}

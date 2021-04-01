@@ -23,6 +23,6 @@ module "db" {
   skip_final_snapshot     = true
   deletion_protection     = false
 
-  subnet_ids             = module.vpc.database_subnets
+  subnet_ids             = module.vpc.private_subnets
   vpc_security_group_ids = [module.security_group_db.this_security_group_id]
 }
