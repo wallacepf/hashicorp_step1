@@ -1,21 +1,39 @@
 data "aws_ami" "backend_ami" {
   most_recent = true
-  owners      = ["self"]
+  owners      = ["099720109477"]
 
   filter {
     name   = "name"
-    values = ["backend-app1-*"]
+    values = ["ubuntu/images/hvm-ssd/*ubuntu-focal-20.04-amd64-server-*"]
   }
 
-  depends_on = [
-    null_resource.build_backend_image
-  ]
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
 }
 
 locals {
   user_data = <<EOF
 #!/bin/bash
-cd /home/ubuntu/backend
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+sudo apt-get update
+sudo apt-get install npm consul -y
+sudo npm install pm2 --global
+mkdir backend
+wget https://backend-hc-step1.s3-us-west-2.amazonaws.com/backend.tar.gz
+tar -xvzf backend.tar.gz -C backend/
+cd backend
+cp .env.sample .env
+sed -i "s/TYPEORM_HOST=mydbaddr/TYPEORM_HOST=${module.db.this_db_instance_address}/g" .env
+sudo pm2 install typescript
 npm run migrations
 pm2 start src/main.ts
 EOF
