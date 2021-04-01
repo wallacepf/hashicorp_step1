@@ -21,17 +21,13 @@ pm2 start src/main.ts
 EOF
 }
 
-resource "random_pet" "srv_suffix" {
-  length = 2
-}
-
 module "ec2" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~>2.0"
 
   instance_count = 1
 
-  name                        = "backend-${random_pet.srv_suffix}"
+  name                        = "backend-${var.env}"
   ami                         = data.aws_ami.backend_ami.id
   instance_type               = "t2.micro"
   key_name                    = "tf_lab_key"
