@@ -20,7 +20,7 @@ data "aws_ami" "backend_ami" {
 }
 
 locals {
-  user_data = <<EOF
+  backend_user_data = <<EOF
 #!/bin/bash
 curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
@@ -39,7 +39,7 @@ pm2 start src/main.ts
 EOF
 }
 
-module "ec2" {
+module "ec2_backend" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~>2.0"
 
@@ -53,7 +53,7 @@ module "ec2" {
   vpc_security_group_ids      = [module.security_group_backend.this_security_group_id]
   associate_public_ip_address = true
 
-  user_data_base64 = base64encode(local.user_data)
+  user_data_base64 = base64encode(local.backend_user_data)
 
 
   tags = local.common_tags

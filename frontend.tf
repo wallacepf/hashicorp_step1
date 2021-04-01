@@ -31,7 +31,7 @@ wget https://frontend-hc-step1.s3-us-west-2.amazonaws.com/frontend.tar.gz
 tar -xvzf frontend.tar.gz -C frontend/
 cd frontend
 npm i
-echo "API_URL=http://${module.ec2.public_ip[0]}:3030" > .env
+echo "API_URL=http://${module.ec2_backend.public_ip[0]}:3030" > .env
 source .env
 npm run build
 sudo npm start
