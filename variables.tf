@@ -29,5 +29,5 @@ variable "private_subnet_cidr_blocks" {
 }
 
 variable "backend_instance_count" {
-  default = 2
+  default = 1
 }

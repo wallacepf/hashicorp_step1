@@ -2,7 +2,7 @@ module "db" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~>2.0"
 
-  identifier = "demodb"
+  identifier = "demodb-${local.name_suffix}"
 
   engine         = "postgres"
   engine_version = "12.5"
