@@ -49,7 +49,7 @@ module "ec2" {
   ami                         = data.aws_ami.backend_ami.id
   instance_type               = "t2.micro"
   key_name                    = "tf_lab_key"
-  subnet_ids                  = module.vpc.public_subnets
+  subnet_ids                  = module.vpc.private_subnets
   vpc_security_group_ids      = [module.security_group_backend.this_security_group_id]
   associate_public_ip_address = true
 
