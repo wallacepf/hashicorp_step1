@@ -26,6 +26,7 @@ curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
 sudo apt-get update
 sudo apt-get install npm consul -y
+cd /home/ubuntu
 mkdir frontend
 wget https://frontend-hc-step1.s3-us-west-2.amazonaws.com/frontend.tar.gz
 tar -xvzf frontend.tar.gz -C frontend/

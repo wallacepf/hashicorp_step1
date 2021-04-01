@@ -53,7 +53,7 @@ module "security_group_backend" {
       to_port     = 3030
       protocol    = "tcp"
       description = "Access from public subnets"
-      cidr_blocks = "0.0.0.0/0"
+      cidr_blocks = module.vpc.public_subnets_cidr_blocks
     },
     {
       from_port   = 22

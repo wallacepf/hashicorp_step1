@@ -28,7 +28,6 @@ variable "private_subnet_cidr_blocks" {
   ]
 }
 
-variable "test" {
-  type    = string
-  default = "abcd"
+variable "backend_instance_count" {
+  default = 2
 }
