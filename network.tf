@@ -9,9 +9,10 @@ module "vpc" {
   name = "vpc-${local.name_suffix}"
   cidr = var.vpc_cidr_block
 
-  azs             = data.aws_availability_zones.available.names
-  private_subnets = var.private_subnet_cidr_blocks
-  public_subnets  = var.public_subnet_cidr_blocks
+  azs              = data.aws_availability_zones.available.names
+  private_subnets  = var.private_subnet_cidr_blocks
+  public_subnets   = var.public_subnet_cidr_blocks
+  database_subnets = var.database_subnet_cidr_blocks
 
   enable_nat_gateway = true
 
@@ -25,10 +26,8 @@ module "security_group_db" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~>3.0"
 
-  name                = "database"
-  vpc_id              = module.vpc.vpc_id
-  ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
-  ingress_rules       = ["all-icmp"]
+  name   = "database"
+  vpc_id = module.vpc.vpc_id
   ingress_with_cidr_blocks = [
     {
       from_port   = 5432
@@ -54,7 +53,43 @@ module "security_group_backend" {
       from_port   = 3030
       to_port     = 3030
       protocol    = "tcp"
-      description = "Public access to the API Server"
+      description = "Access from public subnets"
+      cidr_blocks = module.vpc.vpc_cidr_block
+    },
+    {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      description = "SSH Access"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "Allow outside traffic"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
+
+  tags = local.common_tags
+}
+
+module "security_group_frontend" {
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~>3.0"
+
+  name   = "frontend_app1"
+  vpc_id = module.vpc.vpc_id
+
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      description = "Access from public subnets"
       cidr_blocks = "0.0.0.0/0"
     },
     {
