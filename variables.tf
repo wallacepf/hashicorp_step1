@@ -27,3 +27,8 @@ variable "private_subnet_cidr_blocks" {
     "10.0.3.0/24"
   ]
 }
+
+variable "test" {
+  type    = string
+  default = "abcd"
+}
