@@ -17,7 +17,3 @@ output "backend_az" {
 output "app_url" {
   value = "http://${module.ec2_frontend.public_ip[0]}"
 }
-
-output "app_url1" {
-  value = "http://${module.ec2_frontend.public_ip[0]}"
-}
