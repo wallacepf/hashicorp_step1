@@ -1,95 +1,60 @@
-locals {
-  mime_types = jsondecode(file("${path.module}/data/mime.json"))
-}
+data "aws_ami" "frontend_ami" {
+  most_recent = true
+  owners      = ["099720109477"]
 
-locals {
-  s3_origin_id = "S3FrontEDply"
-}
-
-resource "random_string" "random" {
-  length  = 8
-  special = false
-  upper   = false
-  number  = true
-}
-
-module "frontend_s3_bucket" {
-  source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "~>1.0"
-  bucket  = "frontend-${random_string.random.id}"
-  acl     = "public-read"
-
-  website = {
-    index_document = "index.html"
-    error_document = "404.html"
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/*ubuntu-focal-20.04-amd64-server-*"]
   }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+}
+
+locals {
+  user_data = <<EOF
+#!/bin/bash
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+sudo apt-get update
+sudo apt-get install npm consul -y
+mkdir frontend
+wget https://frontend-hc-step1.s3-us-west-2.amazonaws.com/frontend.tar.gz
+tar -xvzf frontend.tar.gz -C frontend/
+cd frontend
+npm i
+echo "API_URL=http://${module.ec2.public_ip[0]}:3030" > .env
+source .env
+npm run build
+sudo npm start
+EOF
+}
+
+module "ec2" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  version = "~>2.0"
+
+  instance_count = 1
+
+  name                        = "frontend-${var.env}"
+  ami                         = data.aws_ami.backend_ami.id
+  instance_type               = "t2.micro"
+  key_name                    = "tf_lab_key"
+  subnet_ids                  = module.vpc.public_subnets
+  vpc_security_group_ids      = [module.security_group_frontend.this_security_group_id]
+  associate_public_ip_address = true
+
+  user_data_base64 = base64encode(local.user_data)
+
 
   tags = local.common_tags
 
-  depends_on = [
-    null_resource.setup_frontend
-  ]
-
-  force_destroy = true
 }
-
-resource "aws_s3_bucket_object" "copy_app" {
-  for_each = fileset("/Users/wallacepf/Dev/Study/cdond-c3-projectstarter/frontend/dist", "**")
-
-  bucket = module.frontend_s3_bucket.this_s3_bucket_id
-  key    = each.value
-  source = "/Users/wallacepf/Dev/Study/cdond-c3-projectstarter/frontend/dist/${each.value}"
-
-  etag         = filemd5("/Users/wallacepf/Dev/Study/cdond-c3-projectstarter/frontend/dist/${each.value}")
-  content_type = lookup(local.mime_types, regex("\\.[^.]+$", each.value), null)
-
-
-  acl = "public-read"
-}
-
-# resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
-#   comment = "Origin Access Identity for Serverless Static Website"
-# }
-
-# resource "aws_cloudfront_distribution" "frontend_distribution" {
-#   origin {
-#     domain_name = module.frontend_s3_bucket.this_s3_bucket_bucket_regional_domain_name
-#     origin_id   = local.s3_origin_id
-#     s3_origin_config {
-#       origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
-#     }
-#   }
-
-
-#   enabled             = true
-#   default_root_object = "index.html"
-
-#   default_cache_behavior {
-#     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-#     cached_methods   = ["GET", "HEAD"]
-#     target_origin_id = local.s3_origin_id
-#     forwarded_values {
-#       query_string = false
-#       cookies {
-#         forward = "none"
-#       }
-#     }
-#     viewer_protocol_policy = "redirect-to-https"
-#   }
-
-#   restrictions {
-#     geo_restriction {
-#       restriction_type = "whitelist"
-#       locations        = ["US", "BR"]
-#     }
-#   }
-
-#   viewer_certificate {
-#     cloudfront_default_certificate = true
-#   }
-
-#   wait_for_deployment = false
-
-#   tags = local.common_tags
-
-# }
