@@ -1,7 +1,3 @@
-output "s3_frontend_endpoint" {
-  value = "http://${module.frontend_s3_bucket.this_s3_bucket_bucket_regional_domain_name}/index.html"
-}
-
 output "db_address" {
   value = "${module.db.this_db_instance_address}:${module.db.this_db_instance_port}"
 }
@@ -16,4 +12,8 @@ output "backend_api_url" {
 
 output "backend_az" {
   value = module.ec2.availability_zone
+}
+
+output "app_url" {
+  value = "http://${module.ec2_frontend.public_ip[0]}"
 }

@@ -20,7 +20,7 @@ data "aws_ami" "frontend_ami" {
 }
 
 locals {
-  user_data = <<EOF
+  frontend_user_data = <<EOF
 #!/bin/bash
 curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
@@ -38,7 +38,7 @@ sudo npm start
 EOF
 }
 
-module "ec2" {
+module "ec2_frontend" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~>2.0"
 
@@ -52,7 +52,7 @@ module "ec2" {
   vpc_security_group_ids      = [module.security_group_frontend.this_security_group_id]
   associate_public_ip_address = true
 
-  user_data_base64 = base64encode(local.user_data)
+  user_data_base64 = base64encode(local.frontend_user_data)
 
 
   tags = local.common_tags
