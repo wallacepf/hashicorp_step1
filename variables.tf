@@ -41,7 +41,11 @@ variable "backend_instance_count" {
   default = 1
 }
 
-variable "instance_type" {
+variable "frontend_instance_type" {
+  default = "t2.micro"
+}
+
+variable "backend_instance_type" {
   default = "t2.micro"
 }
 

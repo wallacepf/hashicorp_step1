@@ -47,7 +47,7 @@ module "ec2_frontend" {
 
   name                        = "frontend-${random_string.random.id}"
   ami                         = data.aws_ami.frontend_ami.id
-  instance_type               = "t2.micro"
+  instance_type               = var.frontend_instance_type
   key_name                    = "tf_lab_key"
   subnet_ids                  = module.vpc.public_subnets
   vpc_security_group_ids      = [module.security_group_frontend.this_security_group_id]
