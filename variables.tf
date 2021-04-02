@@ -44,3 +44,8 @@ variable "backend_instance_count" {
 variable "instance_type" {
   default = "t2.micro"
 }
+
+variable "db_instance_type" {
+  default = "db.t2.micro"
+}
+

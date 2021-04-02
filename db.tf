@@ -7,7 +7,7 @@ module "db" {
   engine         = "postgres"
   engine_version = "12.5"
   family         = "postgres12"
-  instance_class = "db.t2.micro"
+  instance_class = var.db_instance_type
 
   allocated_storage     = 20
   max_allocated_storage = 100

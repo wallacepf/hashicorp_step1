@@ -11,7 +11,7 @@ provider "aws" {
 }
 
 resource "random_string" "random" {
-  length   = 8
-  upper    = false
+  length  = 8
+  upper   = false
   special = false
 }
