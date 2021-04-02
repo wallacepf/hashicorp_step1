@@ -1,13 +1,22 @@
+locals {
+  description = var.description
+  owner       = var.owner
+  common_tags = {
+    Description = local.description
+    Owner       = local.owner
+  }
+}
+
 variable "aws_region" {
   default = "us-west-2"
 }
 
-variable "project" {
+variable "description" {
   default = "hashicorp-interview"
 }
 
-variable "env" {
-  default = "dev"
+variable "owner" {
+  default = "wallacepf"
 }
 
 variable "vpc_cidr_block" {
@@ -30,4 +39,8 @@ variable "private_subnet_cidr_blocks" {
 
 variable "backend_instance_count" {
   default = 1
+}
+
+variable "instance_type" {
+  default = "t2.micro"
 }

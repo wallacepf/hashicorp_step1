@@ -32,7 +32,7 @@ wget https://frontend-hc-step1.s3-us-west-2.amazonaws.com/frontend.tar.gz
 tar -xvzf frontend.tar.gz -C frontend/
 cd frontend
 npm i
-echo "API_URL=http://${module.ec2_backend.public_ip[0]}:3030" > .env
+echo "API_URL=http://${module.backend.backend_ip[0]}:3030" > .env
 source .env
 npm run build
 sudo npm start
@@ -45,8 +45,8 @@ module "ec2_frontend" {
 
   instance_count = 1
 
-  name                        = "frontend-${var.env}"
-  ami                         = data.aws_ami.backend_ami.id
+  name                        = "frontend-${random_string.random.id}"
+  ami                         = data.aws_ami.frontend_ami.id
   instance_type               = "t2.micro"
   key_name                    = "tf_lab_key"
   subnet_ids                  = module.vpc.public_subnets

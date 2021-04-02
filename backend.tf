@@ -1,64 +1,15 @@
-data "aws_ami" "backend_ami" {
-  most_recent = true
-  owners      = ["099720109477"]
+module "backend" {
+  source  = "app.terraform.io/myterraformcloud/backend/aws"
+  version = "~>1.0.0"
 
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/*ubuntu-focal-20.04-amd64-server-*"]
-  }
+  key_name = "tf_lab_key"
 
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
-  }
+  app_s3_addr  = "https://backend-hc-step1.s3-us-west-2.amazonaws.com/backend.tar.gz"
+  db_address   = module.db.this_db_instance_address
+  backend_name = "backend-${random_string.random.id}"
 
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-}
-
-locals {
-  backend_user_data = <<EOF
-#!/bin/bash
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-sudo apt-get update
-sudo apt-get install npm consul -y
-sudo npm install pm2 --global
-cd /home/ubuntu
-mkdir backend
-wget https://backend-hc-step1.s3-us-west-2.amazonaws.com/backend.tar.gz
-tar -xvzf backend.tar.gz -C backend/
-cd backend
-cp .env.sample .env
-sed -i "s/TYPEORM_HOST=mydbaddr/TYPEORM_HOST=${module.db.this_db_instance_address}/g" .env
-source .env
-sudo npm i
-sudo npm run build
-sudo pm2 install typescript
-sudo npm run migrations
-sudo pm2 start src/main.ts
-EOF
-}
-
-module "ec2_backend" {
-  source  = "terraform-aws-modules/ec2-instance/aws"
-  version = "~>2.0"
-
-  instance_count = var.backend_instance_count
-
-  name                        = "backend-${var.env}"
-  ami                         = data.aws_ami.backend_ami.id
-  instance_type               = "t2.micro"
-  key_name                    = "tf_lab_key"
-  subnet_ids                  = module.vpc.public_subnets
-  vpc_security_group_ids      = [module.security_group_backend.this_security_group_id]
-  associate_public_ip_address = true
-
-  user_data_base64 = base64encode(local.backend_user_data)
+  backend_subnets = module.vpc.public_subnets
+  security_group  = module.security_group_backend.this_security_group_id
 
   tags = local.common_tags
-
 }

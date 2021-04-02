@@ -7,11 +7,7 @@ output "db_azs" {
 }
 
 output "backend_api_url" {
-  value = "http://${module.ec2_backend.public_ip[0]}:3030"
-}
-
-output "backend_az" {
-  value = module.ec2_backend.availability_zone
+  value = "http://${module.backend.backend_ip[0]}:3030"
 }
 
 output "app_url" {
